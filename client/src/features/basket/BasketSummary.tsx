@@ -1,6 +1,7 @@
 import { TableContainer, Paper, Table, TableBody, TableRow, TableCell } from "@mui/material";
 import { currencyFormat } from "../../app/util/util";
-import { useStoreContext } from "../../app/context/StoreContext";
+import { useAppSelector } from "../../app/store/configureStore";
+// import { useStoreContext } from "../../app/context/StoreContext";
 
 // interface Props {
 //     subtotal: number,
@@ -8,9 +9,12 @@ import { useStoreContext } from "../../app/context/StoreContext";
 // }
 
 export default function BasketSummary() {  //{ subtotal, deliveryFee }: Props) {
-    const { basket } = useStoreContext();
+    // const { basket } = useStoreContext();
+
+    const { basket } = useAppSelector(state => state.basket);
+
     const subtotal = basket?.items.reduce((sum, item) => item.quantity * item.price + sum, 0) ?? 0;
-    const deliveryFee = subtotal > 10000 ? 0 : 500;
+    const deliveryFee = subtotal > 10000 || subtotal === 0 ? 0 : 500;
 
     return (
         <>
