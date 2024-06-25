@@ -1,15 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using API.Extensions;
+using API.RequestHelpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-    
+
     public class ProductsController : BaseApiController
     {
         private readonly StoreContext _context;
@@ -19,11 +22,36 @@ namespace API.Controllers
             _context = context;
         }
 
+        // [HttpGet]
+        // public async Task<ActionResult<List<Product>>> GetProducts(string orderBy,
+        // string searchTerm, string brands, string types)
+        // {
+        //     var query = _context.Products
+        //     .Sort(orderBy)
+        //     .Search(searchTerm)
+        //     .Filter(brands, types)
+        //     .AsQueryable();
+
+        //     var products = await query.ToListAsync(); //await _context.Products.ToListAsync();
+        //     return Ok(products);
+        // }
+
         [HttpGet]
-        public async Task<ActionResult<List<Product>>> GetProducts()
+        public async Task<ActionResult<PagedList<Product>>> GetProducts([FromQuery] ProductParams productParams)
         {
-            var products = await _context.Products.ToListAsync();
-            return Ok(products);
+            var query = _context.Products
+            .Sort(productParams.OrderBy)
+            .Search(productParams.SearchTerm)
+            .Filter(productParams.Brands, productParams.Types)
+            .AsQueryable();
+
+            var products = await PagedList<Product>.ToPagedList(query,
+            productParams.PageNumber, productParams.PageSize);
+
+            // Response.Headers.Append("Pagination",
+            // JsonSerializer.Serialize(products.MetaData));
+            Response.AddPaginationHeader(products.MetaData);
+            return products;
         }
 
         [HttpGet("{id}")]
@@ -32,6 +60,14 @@ namespace API.Controllers
             var product = await _context.Products.FindAsync(id);
             if (product == null) return NotFound();
             return product;
+        }
+
+        [HttpGet("filters")]
+        public async Task<ActionResult> GetFilters()
+        {
+            var brands = await _context.Products.Select(b => b.Brand).Distinct().ToListAsync();
+            var types = await _context.Products.Select(b => b.Type).Distinct().ToListAsync();
+            return Ok(new { brands, types });
         }
     }
 }
