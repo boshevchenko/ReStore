@@ -1,4 +1,4 @@
-import React from 'react'
+// import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './app/layout/styles.css'
 import '@fontsource/roboto/300.css';
@@ -16,11 +16,11 @@ import { Provider } from 'react-redux';
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
 root.render(
-  <React.StrictMode>
+  <>
     {/* <StoreProvider> */}
     <Provider store={store}>
       <RouterProvider router={router} />
     </Provider>
     {/* </StoreProvider> */}
-  </React.StrictMode>
+  </>
 )

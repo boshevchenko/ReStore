@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import { router } from "../router/Routes";
 import { PaginatedResponse } from "../models/pagination";
+import { store } from "../store/configureStore";
 
 const sleep = () => new Promise(resolve => setTimeout(resolve, 100));
 
@@ -10,6 +10,12 @@ axios.defaults.baseURL = 'http://localhost:5000/api/'
 axios.defaults.withCredentials = true;
 
 const responseBody = (response: AxiosResponse) => response.data;
+
+axios.interceptors.request.use(config => {
+    const token = store.getState().account.user?.token;
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+})
 
 axios.interceptors.response.use(async response => {
     await sleep();
@@ -19,9 +25,10 @@ axios.interceptors.response.use(async response => {
             new PaginatedResponse(response.data, JSON.parse(pagination));
         return response;
     }
-    return response
-}, (error: AxiosError) => {
-    const { data, status } = error.response as AxiosResponse;
+    return response;
+}, async (error: AxiosError) => {
+    await sleep();
+    const { data, status, statusText } = error.response as AxiosResponse;
     switch (status) {
         case 400:
             if (data.errors) {
@@ -35,13 +42,12 @@ axios.interceptors.response.use(async response => {
             }
             toast.error(data.title);
             break;
-        case 401: toast.error(data.title);
+        case 401:
+            toast.error(statusText);
             break;
         case 500:
-            router.navigate('/server-error',
-                { state: { error: data } }
-            )
-            //toast.error(data.title);
+            toast.error(data.title);
+            router.navigate('/server-error', { state: { error: data } });
             break;
         default:
             break;
@@ -51,8 +57,8 @@ axios.interceptors.response.use(async response => {
 
 const requests = {
     get: (url: string, params?: URLSearchParams) => axios.get(url, { params }).then(responseBody),
-    post: (url: string, body: object) => axios.post(url).then(responseBody),
-    put: (url: string, body: object) => axios.put(url).then(responseBody),
+    post: (url: string, body: object) => axios.post(url, body).then(responseBody),
+    put: (url: string, body: object) => axios.put(url, body).then(responseBody),
     delete: (url: string) => axios.delete(url).then(responseBody)
 }
 
@@ -76,10 +82,17 @@ const Basket = {
     removeItem: (productId: number, quantity = 1) => requests.delete(`basket?productId=${productId}&quantity=${quantity}`)
 }
 
+const Account = {
+    login: (values: any) => requests.post('account/login', values),
+    register: (values: any) => requests.post('account/register', values),
+    currentUser: () => requests.get('account/currentuser')
+}
+
 const agent = {
     Catalog,
     TestErrors,
-    Basket
+    Basket,
+    Account
 }
 
 export default agent;
