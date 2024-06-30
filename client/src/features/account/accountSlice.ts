@@ -26,7 +26,7 @@ export const signInUser = createAsyncThunk<User, FieldValues>(
             return user;
         } catch (error: any) {
             console.log(error);
-            thunkAPI.rejectWithValue({ error: error.data }); a
+            thunkAPI.rejectWithValue({ error: error.data });
         }
     }
 )
