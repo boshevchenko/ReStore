@@ -3,26 +3,27 @@
 // import agent from "../../app/api/agent";
 // import LoadingComponent from "../../app/layout/LoadingComponent";
 
-import { Box, Button, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import { Add, Delete, Remove } from "@mui/icons-material";
+import { Button, Grid, Typography } from "@mui/material";
+// import { Add, Delete, Remove } from "@mui/icons-material";
 // import { useStoreContext } from "../../app/context/StoreContext";
 // import { useState } from "react";
 // import agent from "../../app/api/agent";
-import { LoadingButton } from "@mui/lab";
+// import { LoadingButton } from "@mui/lab";
 import BasketSummary from "./BasketSummary";
-import { currencyFormat } from "../../app/util/util";
+// import { currencyFormat } from "../../app/util/util";
 import { Link } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
-import { removeBasketItemAsync, addBasketItemAsync } from "./basketSlice";
+import { useAppSelector } from "../../app/store/configureStore";
+import BasketTable from "./BasketTable";
+// import { removeBasketItemAsync, addBasketItemAsync } from "./basketSlice";
 // import { removeItem, setBasket } from "./basketSlice";
 
 export default function BasketPage() {
 
     //const { basket, setBasket, removeItem } = useStoreContext();
 
-    const dispatch = useAppDispatch();
+    //const dispatch = useAppDispatch();
     //const basket = useAppSelector(state => state.basket.basket);
-    const { basket, status } = useAppSelector(state => state.basket);
+    const { basket } = useAppSelector(state => state.basket);
 
     // const [status, setStatus] = useState({
     //     loading: false,
@@ -63,7 +64,7 @@ export default function BasketPage() {
 
     return (
         <>
-            <TableContainer component={Paper}>
+            {/* <TableContainer component={Paper}>
                 <Table sx={{ minWidth: 650 }}>
                     <TableHead>
                         <TableRow>
@@ -121,7 +122,8 @@ export default function BasketPage() {
                         ))}
                     </TableBody>
                 </Table>
-            </TableContainer>
+            </TableContainer> */}
+            <BasketTable items={basket.items} />
             <Grid container>
                 <Grid item xs={5} />
                 <Grid item xs={7}>
