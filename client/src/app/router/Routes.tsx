@@ -13,12 +13,15 @@ import Register from "../../features/account/Register";
 import Login from "../../features/account/Login";
 import RequireAuth from "./RequireAuth";
 import Orders from "../../features/orders/Orders";
+import Inventory from "../../features/admin/inventory";
+
 // import OrderDetails from "../../features/orders/OrderDetails";
 
 export const router = createBrowserRouter([{
     path: '/',
     element: <App />,
     children: [
+        // authenticated roots
         {
             element: <RequireAuth />, children: [
                 { path: 'checkout', element: <CheckoutPage /> },
@@ -26,6 +29,11 @@ export const router = createBrowserRouter([{
                 // { path: 'order/:id', element: <OrderDetails /> }
                 // { path: 'order', element: <OrderDetails /> }
             ]
+        },
+        // admin roots
+        {
+            element: <RequireAuth roles={['Admin']} />, children: [
+                { path: 'inventory', element: <Inventory /> }]
         },
         { path: '', element: <HomePage /> },
         { path: 'catalog', element: <Catalog /> },

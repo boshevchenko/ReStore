@@ -14,5 +14,6 @@ namespace API.Entities
 
         public int QuantityInStock { get; set; }
 
+        public string PublicId { get; set; }
     }
 }

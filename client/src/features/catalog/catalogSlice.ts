@@ -56,6 +56,17 @@ export const fetchProductAsync = createAsyncThunk<Product, number>(
     }
 )
 
+export const deleteProductAsync = createAsyncThunk<number, number>(
+    'catalog/deleteProductAsync',
+    async (productId, thunkAPI) => {
+        try {
+            return await agent.Admin.deleteProduct(productId);
+        } catch (error: any) {
+            return thunkAPI.rejectWithValue({ error: error.data })
+        }
+    }
+)
+
 export const fetchFilters = createAsyncThunk(
     'catalog/fetchFilters',
     async (_, thunkAPI) => {
@@ -97,8 +108,33 @@ export const catalogSlice = createSlice({
                 ...action.payload
             }
         },
+        setPageNumber: (state, action) => {
+            state.productsLoaded = false;
+            state.productParams = {
+                ...state.productParams,
+                ...action.payload
+            }
+        },
         resetProductParams: (state) => {
             state.productParams = initParams();
+        },
+        resetProductsLoaded: (state) => {
+            state.productsLoaded = false;
+        },
+        setUpdatedProduct: (state, action) => {
+            state.productsLoaded = false;
+            console.log(...state.ids, { ...action.payload });
+            productsAdapter.updateOne(state, action.payload);
+        },
+        setCreatedProduct: (state, action) => {
+            state.productsLoaded = false;
+            console.log(...state.ids, { ...action.payload });
+            productsAdapter.addOne(state, action.payload);
+        },
+        removeProduct: (state, action) => {
+            state.productsLoaded = false;
+            console.log(...state.ids, { ...action.payload });
+            productsAdapter.removeOne(state, action.payload);
         }
     },
     extraReducers: (builder => {
@@ -137,11 +173,25 @@ export const catalogSlice = createSlice({
         builder.addCase(fetchFilters.rejected, (state) => {
             state.status = 'idle';
         });
+
+        builder.addCase(deleteProductAsync.pending, (state) => {
+            state.status = 'pendingDeleteProduct';
+        });
+        builder.addCase(deleteProductAsync.fulfilled, (state, action) => {
+            state.productsLoaded = false;
+            productsAdapter.removeOne(state, action.payload)
+            state.status = 'idle';
+        });
+        builder.addCase(deleteProductAsync.rejected, (state) => {
+            state.status = 'idle';
+        });
     })
 })
 
 export const productSelectors = productsAdapter
     .getSelectors((state: RootState) => state.catalog);
 
-export const { setProductParams, resetProductParams, setMetaData } =
-    catalogSlice.actions;
+export const { setProductParams, resetProductParams, setMetaData,
+    setPageNumber, setUpdatedProduct, setCreatedProduct,
+    resetProductsLoaded, removeProduct
+} = catalogSlice.actions;
